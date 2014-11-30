@@ -131,7 +131,15 @@ def resume():
 	paused = 0
 	pygame.mixer.music.unpause()
 	return "Resumed"
-
+@app.route("/previous")
+def previous():
+	global songNo
+	global songHasChanged
+	songHasChanged = 1
+	songNo = songNo -2
+	if songNo < 0:
+		songNo = len(playlist)-1
+	return "Previous song!"
 serverTh = threading.Thread(target=start_server)
 playerTh = threading.Thread(target=init)
 playerTh.daemon = True
