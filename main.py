@@ -15,7 +15,7 @@ ENDEVENT=42
 
 paused = 0
 songNo = 0
-lastSongNo = 0
+songHasChanged = 0
 
 
 
@@ -43,27 +43,30 @@ def init():
 def play(filename):
 	global songNo
 	global paused
-	global previousFile
-	global playlist
+	global songHasChanged
 	songNo += 1
 	
 	previousFile = filename
 
 	pygame.mixer.music.load('./playlist/'+ filename)
-	print "Now playing " + filename
+	print "Now playing " + filename + " songNo " + str(songNo)
 
 	pygame.mixer.music.play()
 	while pygame.mixer.music.get_busy():
-		#while paused==1:
-		#	time.sleep(0.100)
 		pygame.time.Clock().tick(1000)
-		#time.sleep(0.5)
+		if songHasChanged == 1:
+			break
+	
+	if songHasChanged==1:
+		songHasChanged = 0
+		print "hasChanged songNo ="+str(songNo)
+		play(playlist[songNo])
 	
 	if songNo > len(playlist)-1:
 		songNo=0
 	play(playlist[songNo])	
-	print "Removed " + previousFile + " from the playlist"
-	playlist.remove(previousFile)
+	#print "Removed " + previousFile + " from the playlist"
+	#playlist.remove(previousFile)
 
 def start_server():
 	if __name__ == "__main__":
@@ -82,18 +85,27 @@ def pause():
 	paused = 1
 	pygame.mixer.music.pause()
 	return "Paused"
+
 @app.route('/next', methods=['GET'])
 def nextSong():
-	global lastSongNo
-	global previousFile
-	if songNo < len(playlist) - 1:
-			play(playlist[songNo + 1])
-			lastSongNo = songNo + 1;
-			previousFile = playlist[songNo]
-			return "Song Changed"
-	songNo = 0
-	play(playlist[songNo])
-	return "Playlist Restarted"
+	global songNo
+	global songHasChanged
+	#global lastSongNo
+	#global previousFile
+	#if songNo < len(playlist) - 1:
+	#		play(playlist[songNo + 1])
+	#		lastSongNo = songNo + 1;
+	#		previousFile = playlist[songNo]
+	#		return "Song Changed"
+	#songNo = 0
+	#play(playlist[songNo])
+	#return "Playlist Restarted"
+	
+	songHasChanged=1
+	#songNo += 1
+	if songNo > len(playlist)-1:
+		songNo = 0
+	return "Skipped song"
 		
 def allowed_file(filename):
     return '.' in filename and \
